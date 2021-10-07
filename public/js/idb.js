@@ -35,7 +35,7 @@ function uploadTxn() {
   const txn = db.transaction(['newTxn'], 'readwrite');
 
   // access your pending object store
-  const pendingObjectStore = txn.objectStore('new_pizza');
+  const pendingObjectStore = txn.objectStore('newTxn');
 
   // get all records from store and set to a variable
   const getAll = pendingObjectStore.getAll();
@@ -57,8 +57,8 @@ function uploadTxn() {
             throw new Error(serverResponse);
           }
 
-          const txn = db.transaction(['newtxn'], 'readwrite');
-          const budgetObjectStore = txn.objectStore('newtxn');
+          const txn = db.transaction(['newTxn'], 'readwrite');
+          const budgetObjectStore = txn.objectStore('newTxn');
           // clear all items in your store
           budgetObjectStore.clear();
         })
@@ -71,6 +71,6 @@ function uploadTxn() {
 }
 
 // listen for app coming back online
-window.addEventListener('online', uploadPizza);
+window.addEventListener('online', uploadTxn);
 
 export default saveRecord
