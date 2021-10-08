@@ -1,76 +1,52 @@
 let db;
-const request = indexedDB.open('BudgetTrackr', 1);
+const request = indexedDB.open('tracker', 1);
 
 request.onupgradeneeded = function(event) {
-  const db = event.target.result;
-  db.createObjectStore('newTxn', { autoIncrement: true });
+    const db = event.target.result; // save ref to db
+    db.createObjectStore('budget', { autoIncrement: true }); // create object store table called budget 
 };
 
 request.onsuccess = function(event) {
-  // when db is successfully created with its object store (from onupgradedneeded event above), save reference to db in global variable
-  db = event.target.result;
-
-  // check if app is online, if yes run checkDatabase() function to send all local db data to api
-  if (navigator.onLine) {
-    uploadTxn();
-  }
+    db = event.target.result;
+    if(navigator.onLine) {
+        uploadData();
+        console.log('it is working as should!!!')
+    }
 };
 
 request.onerror = function(event) {
-  // log error here
-  console.log(event.target.errorCode);
+    console.log(event.target.errorCode);
 };
 
 function saveRecord(record) {
-  const txn = db.transaction(['newTxn'], 'readwrite');
+    const transaction = db.transaction('budget', 'readwrite');
+    const budgetObjectStore = transaction.objectStore('budget');
+    
+    budgetObjectStore.add(record);
+};
 
-  const txnObjectStore = txn.objectStore('newTxn');
+function uploadData() {
+    const transaction = db.transaction('budget', 'readwrite');
+    const budgetObjectStore = transaction.objectStore('budget');
+    const getAll = budgetObjectStore.getAll();
 
-  // add record to your store with add method.
-  txnObjectStore.add(record);
-}
-
-function uploadTxn() {
-  // open a transaction on your pending db
-  const txn = db.transaction(['newTxn'], 'readwrite');
-
-  // access your pending object store
-  const pendingObjectStore = txn.objectStore('newTxn');
-
-  // get all records from store and set to a variable
-  const getAll = pendingObjectStore.getAll();
-
-  getAll.onsuccess = function() {
-    // if there was data in indexedDb's store, let's send it to the api server
-    if (getAll.result.length > 0) {
-      fetch('/api/transaction', {
-        method: 'POST',
-        body: JSON.stringify(getAll.result),
-        headers: {
-          Accept: 'application/json, text/plain, */*',
-          'Content-Type': 'application/json'
-        }
-      })
-        .then(response => response.json())
-        .then(serverResponse => { 
-          if (serverResponse.message) {
-            throw new Error(serverResponse);
-          }
-
-          const txn = db.transaction(['newTxn'], 'readwrite');
-          const budgetObjectStore = txn.objectStore('newTxn');
-          // clear all items in your store
-          budgetObjectStore.clear();
+    getAll.onsuccess = function() {
+        fetch('/api/transaction/bulk', {
+            method: "POST",
+            body: JSON.stringify(getAll.result),
+            headers: {
+                Accept: 'application/json, text/plain, */*', 
+                'Content-type': 'application/json'
+            }
         })
-        .catch(err => {
-          // set reference to redirect back here
-          console.log(err);
-        });
+        .then(response => response.json())
+        .then(() => {
+            const transaction = db.transaction('budget', 'readwrite');
+            const budgetObjectStore = transaction.objectStore('budget');
+            budgetObjectStore.clear();
+        })
+        .catch(err => {console.log(err)})
     }
-  };
-}
+};
 
-// listen for app coming back online
-window.addEventListener('online', uploadTxn);
-
-export default saveRecord
+window.addEventListener('online', uploadData);
