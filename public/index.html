@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <meta name="theme-color" content="#317EFB">
-  <link rel="shortcut icon" href="icons/icon-192x192.png" type="image/x-icon">
+  <title>Budget Tracker</title>
+  <link rel="shortcut icon" href="./icons/icon-192x192.png" type="image/x-icon">
 
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="manifest" href="./manifest.json">
-
-  <title>Budget Tracker</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="manifest" href="manifest.json" />
 </head>
+
 <body>
   <div class="wrapper">
     <div class="total">
@@ -44,13 +44,17 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
   <script src="js/index.js"></script>
+  <script src="js/idb.js"></script>
 </body>
-<script>
+<script type="text/javascript">
   (function() {
-    if('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./service-worker.js')
-        .then(() => console.log('Service worker registered successfully!'))
-        .catch(err => console.log('Service worker registration failed: ', err));
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("./service-worker.js")
+        .then(() => console.log("Service Worker registered successfully."))
+        .catch(error =>
+          console.log("Service Worker registration failed:", error)
+        );
     }
   })();
 </script>
